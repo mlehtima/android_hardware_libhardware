@@ -31,6 +31,12 @@
 #include <system/audio.h>
 #include <hardware/audio_effect.h>
 
+#ifdef __ARM_PCS_VFP
+#define FP_ATTRIB __attribute__((pcs("aapcs")))
+#else
+#define FP_ATTRIB
+#endif
+
 __BEGIN_DECLS
 
 /**
@@ -260,7 +266,7 @@ struct audio_stream_out {
      * This method might produce multiple PCM outputs or hardware accelerated
      * codecs, such as MP3 or AAC.
      */
-    int (*set_volume)(struct audio_stream_out *stream, float left, float right);
+    int (*set_volume)(struct audio_stream_out *stream, float left, float right) FP_ATTRIB;
 
     /**
      * Write audio buffer to driver. Returns number of bytes written, or a
@@ -357,7 +363,7 @@ struct audio_broadcast_stream {
      * This method might produce multiple PCM outputs or hardware accelerated
      * codecs, such as MP3 or AAC.
      */
-    int (*set_volume)(struct audio_broadcast_stream *stream, float left, float right);
+    int (*set_volume)(struct audio_broadcast_stream *stream, float left, float right) FP_ATTRIB;
 
     int (*mute)(struct audio_broadcast_stream *stream, bool mute);
 
@@ -377,7 +383,7 @@ struct audio_stream_in {
 
     /** set the input gain for the audio driver. This method is for
      *  for future use */
-    int (*set_gain)(struct audio_stream_in *stream, float gain);
+    int (*set_gain)(struct audio_stream_in *stream, float gain) FP_ATTRIB;
 
     /** Read audio buffer in from audio driver. Returns number of bytes read, or a
      *  negative status_t. If at least one frame was read prior to the error,
@@ -487,14 +493,14 @@ struct audio_hw_device {
     int (*init_check)(const struct audio_hw_device *dev);
 
     /** set the audio volume of a voice call. Range is between 0.0 and 1.0 */
-    int (*set_voice_volume)(struct audio_hw_device *dev, float volume);
+    int (*set_voice_volume)(struct audio_hw_device *dev, float volume) FP_ATTRIB;
 
     /**
      * set the audio volume for all audio activities other than voice call.
      * Range between 0.0 and 1.0. If any value other than 0 is returned,
      * the software mixer will emulate this capability.
      */
-    int (*set_master_volume)(struct audio_hw_device *dev, float volume);
+    int (*set_master_volume)(struct audio_hw_device *dev, float volume) FP_ATTRIB;
 
 #ifndef ICS_AUDIO_BLOB
     /**
@@ -504,12 +510,12 @@ struct audio_hw_device {
      * the initial master volume across all HALs.  HALs which do not support
      * this method may leave it set to NULL.
      */
-    int (*get_master_volume)(struct audio_hw_device *dev, float *volume);
+    int (*get_master_volume)(struct audio_hw_device *dev, float *volume) FP_ATTRIB;
 #endif
 
 #ifdef QCOM_FM_ENABLED
     /** set the fm audio volume. Range is between 0.0 and 1.0 */
-    int (*set_fm_volume)(struct audio_hw_device *dev, float volume);
+    int (*set_fm_volume)(struct audio_hw_device *dev, float volume) FP_ATTRIB;
 #endif
 
     /**
